@@ -1,0 +1,91 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Influencer {
+  id   String @id @default(uuid())
+  name String
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  account   Account[]
+}
+
+model Account {
+  id           String     @id @default(uuid())
+  username     String
+  followers    Int
+  brandingLvl  Int
+  influencerId String
+  platform     Platform
+  influencer   Influencer @relation(fields: [influencerId], references: [id])
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  accountNiche    AccountNiche[]
+  campaignAccount CampaignAccount[]
+}
+
+model AccountNiche {
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id])
+  nicheId   Int
+  niche     Niche   @relation(fields: [nicheId], references: [id])
+
+  @@unique(name: "accountNiche", [accountId, nicheId])
+}
+
+model Niche {
+  id          Int    @id @default(autoincrement())
+  name        String
+  description String
+
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  accountNiche AccountNiche[]
+}
+
+model CampaignAccount {
+  id         Int       @id @default(autoincrement())
+  campaignId String
+  campaign   Campaign  @relation(fields: [campaignId], references: [id])
+  accountId  String
+  account    Account   @relation(fields: [accountId], references: [id])
+  content    Content[]
+
+  @@unique(name: "campaignAccount", [campaignId, accountId])
+}
+
+model Campaign {
+  id              String            @id @default(uuid())
+  name            String
+  platform        Platform
+  operationDate   DateTime          @db.Date
+  campaignAccount CampaignAccount[]
+}
+
+model Content {
+  id              String          @id @default(uuid())
+  link            String
+  campAcctId      Int
+  campaignAccount CampaignAccount @relation(fields: [campAcctId], references: [id])
+}
+
+enum Platform {
+  TIKTOK
+  FACEBOOK
+  INSTAGRAM
+  X
+}

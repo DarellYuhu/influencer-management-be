@@ -1,10 +1,15 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { PrismaModule } from './core/prisma/prisma.module';
+import { InfluencerModule } from './influencer/influencer.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    PrismaModule,
+    InfluencerModule,
+    ConfigModule.forRoot({
+      envFilePath: ['.env.development'],
+    }),
+  ],
 })
 export class AppModule {}
