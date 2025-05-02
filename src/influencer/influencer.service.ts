@@ -14,4 +14,17 @@ export class InfluencerService {
     });
     return data;
   }
+
+  async findAll() {
+    const data = await this.prisma.influencer.findMany({});
+    return data;
+  }
+
+  async findOne(id: string) {
+    const data = await this.prisma.influencer.findUnique({
+      where: { id },
+      include: { account: true },
+    });
+    return data;
+  }
 }
