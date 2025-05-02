@@ -2,7 +2,7 @@ import { Body, Controller, Post } from '@nestjs/common';
 import { InfluencerService } from './influencer.service';
 import { CreateInfluencerDto } from './dto/create-influencer.dto';
 
-@Controller('influencer')
+@Controller('influencers')
 export class InfluencerController {
   constructor(private readonly influencerService: InfluencerService) {}
 

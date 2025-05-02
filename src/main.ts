@@ -16,6 +16,7 @@ async function bootstrap() {
   await SwaggerModule.loadPluginMetadata(metadata);
   const document = SwaggerModule.createDocument(app, config);
 
+  app.enableCors({ origin: process.env.ALLOWED_ORIGINS.split(',') ?? '*' });
   app.use('/docs', apiReference({ content: document, layout: 'classic' }));
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
