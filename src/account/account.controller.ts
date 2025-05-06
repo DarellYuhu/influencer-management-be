@@ -1,6 +1,7 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { AccountService } from './account.service';
 import { Platform } from 'src/enums';
+import { AddNicheDto } from './dto/add-niche.dto';
 
 @Controller('accounts')
 export class AccountController {
@@ -9,5 +10,10 @@ export class AccountController {
   @Get()
   findAll(@Query('platform') platform?: string) {
     return this.accountService.findAll(platform as Platform);
+  }
+
+  @Post(':id/niches')
+  addNiche(@Param('id') id: string, @Body() payload: AddNicheDto) {
+    return this.accountService.addNiche(id, payload.nicheIds);
   }
 }

@@ -12,4 +12,10 @@ export class AccountService {
     if (platform) filter.platform = platform;
     return this.prisma.account.findMany({ where: filter });
   }
+
+  addNiche(id: string, nicheIds: number[]) {
+    return this.prisma.accountNiche.createMany({
+      data: nicheIds.map((nicheId) => ({ accountId: id, nicheId })),
+    });
+  }
 }

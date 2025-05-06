@@ -4,6 +4,7 @@ import { InfluencerModule } from './influencer/influencer.module';
 import { ConfigModule } from '@nestjs/config';
 import { CampaignModule } from './campaign/campaign.module';
 import { AccountModule } from './account/account.module';
+import { NicheModule } from './niche/niche.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { AccountModule } from './account/account.module';
     }),
     CampaignModule,
     AccountModule,
+    NicheModule,
   ],
 })
 export class AppModule {}
