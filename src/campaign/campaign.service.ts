@@ -19,12 +19,10 @@ export class CampaignService {
       where: { id },
       include: { campaignAccount: { include: { account: true } } },
     });
-
     const normalize = {
       ...data,
       campaignAccount: data.campaignAccount.map((item) => item.account),
     };
-
     return normalize;
   }
 

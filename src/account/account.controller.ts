@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { AccountService } from './account.service';
 import { Platform } from 'src/enums';
 import { AddNicheDto } from './dto/add-niche.dto';
+import { AddCampaignDto } from './dto/add-campaign.dto';
 
 @Controller('accounts')
 export class AccountController {
@@ -15,5 +16,10 @@ export class AccountController {
   @Post(':id/niches')
   addNiche(@Param('id') id: string, @Body() payload: AddNicheDto) {
     return this.accountService.addNiche(id, payload.nicheIds);
+  }
+
+  @Post(':id/campaigns')
+  addCampaign(@Param('id') id: string, @Body() payload: AddCampaignDto) {
+    return this.accountService.addCampaign(id, payload.campaignIds);
   }
 }

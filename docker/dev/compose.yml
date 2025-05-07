@@ -10,5 +10,16 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  minio:
+    image: bitnami/minio:2025.4.22-debian-12-r0
+    ports:
+      - '9090:9000'
+      - '9091:9001'
+    env_file:
+      - .env.docker
+    volumes:
+      - minio_data:/bitnami/minio/data
+
 volumes:
   postgres_data:
+  minio_data:

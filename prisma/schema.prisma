@@ -31,6 +31,8 @@ model Account {
   influencerId String
   platform     Platform
   influencer   Influencer @relation(fields: [influencerId], references: [id])
+  avatarId     Int?
+  avatar       File?      @relation(fields: [avatarId], references: [id])
 
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
@@ -77,10 +79,37 @@ model Campaign {
 }
 
 model Content {
-  id              String          @id @default(uuid())
+  id              String          @id
   link            String
+  duration        Int
   campAcctId      Int
   campaignAccount CampaignAccount @relation(fields: [campAcctId], references: [id])
+  coverId         Int
+  cover           File            @relation(fields: [coverId], references: [id])
+  Statistic       Statistic?
+}
+
+model Statistic {
+  contentId String  @unique
+  content   Content @relation(fields: [contentId], references: [id])
+  comment   Int
+  like      Int
+  download  Int
+  play      Int
+  share     Int
+  forward   Int
+}
+
+model File {
+  id       Int    @id @default(autoincrement())
+  name     String
+  path     String
+  mimeType String
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  content   Content[]
+  account   Account[]
 }
 
 enum Platform {
