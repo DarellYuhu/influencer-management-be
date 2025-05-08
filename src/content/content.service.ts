@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { TiktokService } from 'src/tiktok/tiktok.service';
 import { CreateContentDto } from './dto/create-content.dto';
 import Minio from 'minio';
@@ -14,17 +19,37 @@ export class ContentService {
     private readonly prisma: PrismaService,
   ) {}
 
+  async findAll(accountId?: string, campaignId?: string) {
+    const data = await this.prisma.content.findMany({
+      where: {
+        campaignAccount: { accountId, campaignId },
+      },
+      include: { cover: true, statistic: true },
+    });
+    const normalize = await Promise.all(
+      data.map(async (item) => ({
+        ...item,
+        cover: await this.minio.presignedGetObject('files', item.cover.name),
+      })),
+    );
+    return normalize;
+  }
+
   async createMany(payload: CreateContentDto) {
     const parsed = payload.urls.map(this.parseUrl);
-    const campaignAccount = await this.prisma.campaignAccount.findUnique({
-      include: { account: true },
-      where: {
-        campaignAccount: {
-          accountId: payload.accountId,
-          campaignId: payload.campaignId,
+    const campaignAccount = await this.prisma.campaignAccount
+      .findUniqueOrThrow({
+        include: { account: true },
+        where: {
+          campaignAccount: {
+            accountId: payload.accountId,
+            campaignId: payload.campaignId,
+          },
         },
-      },
-    });
+      })
+      .catch(() => {
+        throw new NotFoundException('Campaign account not found');
+      });
     const fetched = await Promise.all(
       parsed.map((val) => this.tiktokService.getVideoInfo(val)),
     );
@@ -39,6 +64,7 @@ export class ContentService {
       await this.prisma.account.update({
         where: { id: payload.accountId },
         data: {
+          signature: fetched[0].author.signature,
           avatar: {
             create: {
               mimeType: fetched[0].images.avatar.mimeType,
@@ -76,12 +102,14 @@ export class ContentService {
       fetched.map((val, idx) => {
         return this.prisma.content.create({
           data: {
+            description: val.video.description,
+            createTime: new Date(val.video.createTime * 1000),
             campAcctId: campaignAccount.id,
             coverId: prismaFiles[idx].id,
             link: parsed[idx].url,
             duration: val.video.duration,
             id: val.video.id,
-            Statistic: {
+            statistic: {
               create: {
                 comment: val.video.comment,
                 download: val.video.download,

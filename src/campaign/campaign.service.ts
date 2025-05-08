@@ -17,11 +17,33 @@ export class CampaignService {
   async findOne(id: string) {
     const data = await this.prisma.campaign.findUnique({
       where: { id },
-      include: { campaignAccount: { include: { account: true } } },
+      include: {
+        campaignAccount: {
+          include: { account: true },
+        },
+      },
+    });
+    const statistic = await this.prisma.statistic.aggregate({
+      _sum: {
+        comment: true,
+        download: true,
+        forward: true,
+        like: true,
+        play: true,
+        share: true,
+      },
+      where: {
+        content: {
+          campaignAccount: {
+            campaignId: id,
+          },
+        },
+      },
     });
     const normalize = {
       ...data,
-      campaignAccount: data.campaignAccount.map((item) => item.account),
+      campaignAccount: data?.campaignAccount.map((item) => item.account),
+      statistic: statistic._sum,
     };
     return normalize;
   }

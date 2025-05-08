@@ -14,6 +14,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id       String @id @default(uuid())
+  name     String
+  username String
+  password String
+  role     Role
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Influencer {
   id   String @id @default(uuid())
   name String
@@ -26,6 +37,7 @@ model Influencer {
 model Account {
   id           String     @id @default(uuid())
   username     String
+  signature    String?
   followers    Int
   brandingLvl  Int
   influencerId String
@@ -82,11 +94,13 @@ model Content {
   id              String          @id
   link            String
   duration        Int
+  createTime      DateTime
+  description     String
   campAcctId      Int
   campaignAccount CampaignAccount @relation(fields: [campAcctId], references: [id])
   coverId         Int
   cover           File            @relation(fields: [coverId], references: [id])
-  Statistic       Statistic?
+  statistic       Statistic?
 }
 
 model Statistic {
@@ -117,4 +131,9 @@ enum Platform {
   FACEBOOK
   INSTAGRAM
   X
+}
+
+enum Role {
+  ADMIN
+  USER
 }

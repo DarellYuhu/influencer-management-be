@@ -57,6 +57,8 @@ export class TiktokService {
       },
       video: {
         id,
+        description: data.aweme_list[0].desc,
+        createTime: data.aweme_list[0].create_time,
         duration: data.aweme_list[0].video.duration,
         comment: data.aweme_list[0].statistics.comment_count,
         like: data.aweme_list[0].statistics.digg_count,
@@ -85,7 +87,7 @@ export class TiktokService {
     const size = buffer.length;
 
     const contentDisposition = response.headers['content-disposition'];
-    let filename: string | undefined;
+    let filename: string;
 
     if (contentDisposition && contentDisposition.includes('filename=')) {
       filename = contentDisposition
