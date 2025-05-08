@@ -8,7 +8,7 @@ const MinioProvider: Provider = {
   inject: [ConfigService],
   useFactory: (config: ConfigService) =>
     new Minio.Client({
-      endPoint: config.get('MINIO_ENDPOINT'),
+      endPoint: config.get('MINIO_ENDPOINT') ?? '',
       port: config.get('MINIO_PORT'),
       accessKey: config.get('MINIO_ACCESS_KEY'),
       secretKey: config.get('MINIO_SECRET_KEY'),

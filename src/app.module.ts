@@ -7,6 +7,8 @@ import { AccountModule } from './account/account.module';
 import { NicheModule } from './niche/niche.module';
 import { ContentModule } from './content/content.module';
 import { MinioModule } from './core/minio/minio.module';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -20,6 +22,8 @@ import { MinioModule } from './core/minio/minio.module';
     NicheModule,
     ContentModule,
     MinioModule,
+    AuthModule,
+    UserModule,
   ],
 })
 export class AppModule {}

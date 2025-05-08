@@ -4,3 +4,8 @@ export enum Platform {
   INSTAGRAM = 'INSTAGRAM',
   X = 'X',
 }
+
+export enum Role {
+  ADMIN = 'ADMIN',
+  USER = 'USER',
+}
