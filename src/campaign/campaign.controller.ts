@@ -33,4 +33,13 @@ export class CampaignController {
     const data = await this.campaignService.addAccount(id, payload.accountIds);
     return data;
   }
+
+  @Get(':campId/accounts/:acctId/statistics')
+  async campAcctOveralStats(
+    @Param('campId') campId: string,
+    @Param('acctId') acctId: string,
+  ) {
+    const data = await this.campaignService.campAcctOveralStats(campId, acctId);
+    return data;
+  }
 }

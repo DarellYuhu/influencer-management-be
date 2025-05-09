@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/core/prisma/prisma.service';
 import { CreateCampaignDto } from './dto/campaign-create.dto';
 
@@ -53,5 +53,45 @@ export class CampaignService {
       data: accountIds.map((accountId) => ({ campaignId: id, accountId })),
       skipDuplicates: true,
     });
+  }
+
+  async campAcctOveralStats(campaignId: string, accountId: string) {
+    const account = await this.prisma.account
+      .findUniqueOrThrow({
+        where: { id: accountId },
+        select: { followers: true },
+      })
+      .catch(() => {
+        throw new NotFoundException('Account not found');
+      });
+    const statistic = await this.prisma.statistic.aggregate({
+      where: {
+        content: {
+          campaignAccount: {
+            campaignId,
+            accountId,
+          },
+        },
+      },
+      _avg: {
+        comment: true,
+        download: true,
+        forward: true,
+        like: true,
+        play: true,
+        share: true,
+      },
+    });
+    const performance = await this.prisma.content.aggregate({
+      _avg: {
+        prodComplexity: true,
+        messageEmbeding: true,
+      },
+    });
+    return {
+      ...statistic._avg,
+      ...performance._avg,
+      playToFollowers: statistic._avg.play! / account.followers,
+    };
   }
 }
