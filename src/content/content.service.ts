@@ -10,6 +10,7 @@ import Minio from 'minio';
 import { PrismaService } from 'src/core/prisma/prisma.service';
 import { Prisma } from 'generated/prisma';
 import { MINIO_CLIENT } from 'src/core/minio/minio.module';
+import { UpdateContentDto } from './dto/update-content.dto';
 
 @Injectable()
 export class ContentService {
@@ -19,17 +20,36 @@ export class ContentService {
     private readonly prisma: PrismaService,
   ) {}
 
+  update(id: string, payload: UpdateContentDto) {
+    return this.prisma.content.update({
+      where: { id },
+      data: payload,
+    });
+  }
+
+  async findOne(id: string) {
+    return this.prisma.content.findUnique({ where: { id } });
+  }
+
   async findAll(accountId?: string, campaignId?: string) {
     const data = await this.prisma.content.findMany({
       where: {
         campaignAccount: { accountId, campaignId },
       },
-      include: { cover: true, statistic: true },
+      include: {
+        cover: true,
+        statistic: true,
+        campaignAccount: {
+          select: { account: { select: { followers: true } } },
+        },
+      },
     });
     const normalize = await Promise.all(
       data.map(async (item) => ({
         ...item,
         cover: await this.minio.presignedGetObject('files', item.cover.name),
+        playToFollowers:
+          item.statistic!.play / item.campaignAccount.account.followers,
       })),
     );
     return normalize;

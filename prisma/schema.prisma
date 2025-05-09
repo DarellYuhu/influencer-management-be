@@ -96,6 +96,8 @@ model Content {
   duration        Int
   createTime      DateTime
   description     String
+  prodComplexity  Int?
+  messageEmbeding Int?
   campAcctId      Int
   campaignAccount CampaignAccount @relation(fields: [campAcctId], references: [id])
   coverId         Int

@@ -1,6 +1,15 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ContentService } from './content.service';
 import { CreateContentDto } from './dto/create-content.dto';
+import { UpdateContentDto } from './dto/update-content.dto';
 
 @Controller('contents')
 export class ContentController {
@@ -17,5 +26,14 @@ export class ContentController {
   @Post()
   createMany(@Body() payload: CreateContentDto) {
     return this.contentService.createMany(payload);
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.contentService.findOne(id);
+  }
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() payload: UpdateContentDto) {
+    return this.contentService.update(id, payload);
   }
 }
