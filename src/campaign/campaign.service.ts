@@ -83,6 +83,12 @@ export class CampaignService {
       },
     });
     const performance = await this.prisma.content.aggregate({
+      where: {
+        campaignAccount: {
+          campaignId,
+          accountId,
+        },
+      },
       _avg: {
         prodComplexity: true,
         messageEmbeding: true,

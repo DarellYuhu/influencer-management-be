@@ -120,8 +120,10 @@ export class ContentService {
 
     await this.prisma.$transaction(
       fetched.map((val, idx) => {
-        return this.prisma.content.create({
-          data: {
+        return this.prisma.content.upsert({
+          where: { id: val.video.id },
+          update: {},
+          create: {
             description: val.video.description,
             createTime: new Date(val.video.createTime * 1000),
             campAcctId: campaignAccount.id,

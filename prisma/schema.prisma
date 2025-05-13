@@ -36,7 +36,7 @@ model Influencer {
 
 model Account {
   id           String     @id @default(uuid())
-  username     String
+  username     String     @unique
   signature    String?
   followers    Int
   brandingLvl  Int
@@ -54,7 +54,7 @@ model Account {
 
 model AccountNiche {
   accountId String
-  account   Account @relation(fields: [accountId], references: [id])
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
   nicheId   Int
   niche     Niche   @relation(fields: [nicheId], references: [id])
 
@@ -76,7 +76,7 @@ model CampaignAccount {
   campaignId String
   campaign   Campaign  @relation(fields: [campaignId], references: [id])
   accountId  String
-  account    Account   @relation(fields: [accountId], references: [id])
+  account    Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
   content    Content[]
 
   @@unique(name: "campaignAccount", [campaignId, accountId])
@@ -99,7 +99,7 @@ model Content {
   prodComplexity  Int?
   messageEmbeding Int?
   campAcctId      Int
-  campaignAccount CampaignAccount @relation(fields: [campAcctId], references: [id])
+  campaignAccount CampaignAccount @relation(fields: [campAcctId], references: [id], onDelete: Cascade)
   coverId         Int
   cover           File            @relation(fields: [coverId], references: [id])
   statistic       Statistic?
@@ -107,7 +107,7 @@ model Content {
 
 model Statistic {
   contentId String  @unique
-  content   Content @relation(fields: [contentId], references: [id])
+  content   Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
   comment   Int
   like      Int
   download  Int
