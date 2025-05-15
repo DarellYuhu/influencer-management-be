@@ -1,11 +1,14 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
-import mime from 'mime';
+import { UtilsService } from 'src/core/utils/utils.service';
 
 @Injectable()
 export class TiktokService {
-  constructor(private readonly http: HttpService) {}
+  constructor(
+    private readonly http: HttpService,
+    private readonly utils: UtilsService,
+  ) {}
 
   async getVideoInfo({ id, url }: { id: string; url: string }) {
     const params = {
@@ -39,8 +42,10 @@ export class TiktokService {
     );
 
     const images = await Promise.all([
-      this.fetchImageMeta(data.aweme_list[0].author.avatar_larger.url_list[0]),
-      this.fetchImageMeta(data.aweme_list[0].video.cover.url_list[0]),
+      this.utils.fetchImageMeta(
+        data.aweme_list[0].author.avatar_larger.url_list[0],
+      ),
+      this.utils.fetchImageMeta(data.aweme_list[0].video.cover.url_list[0]),
     ]);
 
     const normalize = {
@@ -74,37 +79,6 @@ export class TiktokService {
       },
     };
     return normalize;
-  }
-
-  private async fetchImageMeta(url: string) {
-    const response = await firstValueFrom(
-      this.http.get(url, { responseType: 'arraybuffer' }),
-    );
-
-    const buffer = Buffer.from(response.data);
-    const mimeType =
-      response.headers['content-type'] || 'application/octet-stream';
-    const size = buffer.length;
-
-    const contentDisposition = response.headers['content-disposition'];
-    let filename: string;
-
-    if (contentDisposition && contentDisposition.includes('filename=')) {
-      filename = contentDisposition
-        .split('filename=')[1]
-        .replace(/["']/g, '') // remove quotes
-        .trim();
-    } else {
-      const extension = mime.getExtension(mimeType);
-      filename = `${Date.now()}.${extension}`;
-    }
-
-    return {
-      buffer,
-      mimeType,
-      size,
-      filename,
-    };
   }
 }
 

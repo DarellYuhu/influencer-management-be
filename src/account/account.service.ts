@@ -5,6 +5,7 @@ import { Platform } from 'src/enums';
 import { UpdateAccountDto } from './dto/update-account.dto';
 import * as Minio from 'minio';
 import { MINIO_CLIENT } from 'src/core/minio/minio.module';
+import { CreateAccountsDto } from './dto/create-accounts.dto';
 
 @Injectable()
 export class AccountService {
@@ -21,6 +22,16 @@ export class AccountService {
     return this.prisma.account.update({
       where: { id },
       data: payload,
+    });
+  }
+
+  createMany(payload: CreateAccountsDto) {
+    return this.prisma.account.createManyAndReturn({
+      data: payload.accounts.map((acc) => ({
+        ...acc,
+        influencerId: payload.influencerId,
+      })),
+      skipDuplicates: true,
     });
   }
 

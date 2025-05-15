@@ -11,6 +11,7 @@ import { PrismaService } from 'src/core/prisma/prisma.service';
 import { Prisma } from 'generated/prisma';
 import { MINIO_CLIENT } from 'src/core/minio/minio.module';
 import { UpdateContentDto } from './dto/update-content.dto';
+import { v4 } from 'uuid';
 
 @Injectable()
 export class ContentService {
@@ -47,7 +48,9 @@ export class ContentService {
     const normalize = await Promise.all(
       data.map(async (item) => ({
         ...item,
-        cover: await this.minio.presignedGetObject('files', item.cover.name),
+        cover:
+          item.cover &&
+          (await this.minio.presignedGetObject('files', item.cover.name)),
         playToFollowers:
           item.statistic!.play / item.campaignAccount.account.followers,
       })),
@@ -55,8 +58,52 @@ export class ContentService {
     return normalize;
   }
 
-  async createMany(payload: CreateContentDto) {
-    const parsed = payload.urls.map(this.parseUrl);
+  async createMany(
+    schema: (typeof CONTENT_SCHEMA)[number] = 'auto',
+    payload: CreateContentDto,
+  ) {
+    switch (schema) {
+      case 'auto':
+        return this.createAuto(payload);
+      case 'manual':
+        return this.createManual(payload);
+      default:
+        throw new BadRequestException('Invalid schema');
+    }
+  }
+
+  private async createManual(payload: CreateContentDto) {
+    const { id } = await this.prisma.campaignAccount
+      .findUniqueOrThrow({
+        where: {
+          campaignAccount: {
+            accountId: payload.accountId,
+            campaignId: payload.campaignId,
+          },
+        },
+      })
+      .catch(() => {
+        throw new NotFoundException('Campaign account not found');
+      });
+
+    return this.prisma.$transaction(
+      payload.manualData?.map(({ statistic, ...content }) =>
+        this.prisma.content.create({
+          data: {
+            ...content,
+            campAcctId: id,
+            id: v4(),
+            statistic: {
+              create: statistic,
+            },
+          },
+        }),
+      ) ?? [],
+    );
+  }
+
+  private async createAuto(payload: CreateContentDto) {
+    const parsed = payload.urls!.map(this.parseUrl);
     const campaignAccount = await this.prisma.campaignAccount
       .findUniqueOrThrow({
         include: { account: true },
@@ -160,3 +207,5 @@ export class ContentService {
     };
   }
 }
+
+export const CONTENT_SCHEMA = ['auto', 'manual'] as const;

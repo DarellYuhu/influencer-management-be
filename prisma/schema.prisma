@@ -93,15 +93,15 @@ model Campaign {
 model Content {
   id              String          @id
   link            String
-  duration        Int
+  duration        Int?
   createTime      DateTime
   description     String
   prodComplexity  Int?
   messageEmbeding Int?
   campAcctId      Int
   campaignAccount CampaignAccount @relation(fields: [campAcctId], references: [id], onDelete: Cascade)
-  coverId         Int
-  cover           File            @relation(fields: [coverId], references: [id])
+  coverId         Int?
+  cover           File?           @relation(fields: [coverId], references: [id])
   statistic       Statistic?
 }
 

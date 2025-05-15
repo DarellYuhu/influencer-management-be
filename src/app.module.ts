@@ -9,6 +9,7 @@ import { ContentModule } from './content/content.module';
 import { MinioModule } from './core/minio/minio.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
+import { UtilsModule } from './core/utils/utils.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { UserModule } from './user/user.module';
     MinioModule,
     AuthModule,
     UserModule,
+    UtilsModule,
   ],
 })
 export class AppModule {}

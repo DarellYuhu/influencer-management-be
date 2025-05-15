@@ -7,7 +7,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ContentService } from './content.service';
+import { CONTENT_SCHEMA, ContentService } from './content.service';
 import { CreateContentDto } from './dto/create-content.dto';
 import { UpdateContentDto } from './dto/update-content.dto';
 
@@ -24,8 +24,14 @@ export class ContentController {
   }
 
   @Post()
-  createMany(@Body() payload: CreateContentDto) {
-    return this.contentService.createMany(payload);
+  createMany(
+    @Body() payload: CreateContentDto,
+    @Query('schema') schema?: string,
+  ) {
+    return this.contentService.createMany(
+      schema as (typeof CONTENT_SCHEMA)[number],
+      payload,
+    );
   }
 
   @Get(':id')

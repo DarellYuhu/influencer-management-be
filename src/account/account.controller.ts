@@ -12,10 +12,16 @@ import { Platform } from 'src/enums';
 import { AddNicheDto } from './dto/add-niche.dto';
 import { AddCampaignDto } from './dto/add-campaign.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
+import { CreateAccountsDto } from './dto/create-accounts.dto';
 
 @Controller('accounts')
 export class AccountController {
   constructor(private readonly accountService: AccountService) {}
+
+  @Post()
+  createMany(@Body() payload: CreateAccountsDto) {
+    return this.accountService.createMany(payload);
+  }
 
   @Get()
   findAll(
