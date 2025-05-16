@@ -12,6 +12,7 @@ import { Prisma } from 'generated/prisma';
 import { MINIO_CLIENT } from 'src/core/minio/minio.module';
 import { UpdateContentDto } from './dto/update-content.dto';
 import { v4 } from 'uuid';
+import { UtilsService } from 'src/core/utils/utils.service';
 
 @Injectable()
 export class ContentService {
@@ -19,6 +20,7 @@ export class ContentService {
     @Inject(MINIO_CLIENT) private readonly minio: Minio.Client,
     private readonly tiktokService: TiktokService,
     private readonly prisma: PrismaService,
+    private readonly utils: UtilsService,
   ) {}
 
   update(id: string, payload: UpdateContentDto) {
@@ -86,17 +88,42 @@ export class ContentService {
         throw new NotFoundException('Campaign account not found');
       });
 
+    // manual data should be present becuase the validation ensures it
+    const images = await Promise.all(
+      payload.manualData!.map(async ({ imageLink }, idx) => {
+        if (imageLink) {
+          const { buffer, ...file } =
+            await this.utils.fetchImageMeta(imageLink);
+          await this.minio.putObject('files', file.filename, buffer, file.size);
+          return { file, idx };
+        }
+      }),
+    );
+
+    const prismaPayload: Prisma.ContentCreateInput[] = payload.manualData!.map(
+      ({ statistic, imageLink: _, ...content }, idx) => ({
+        campaignAccount: { connect: { id } },
+        id: v4(),
+        ...content,
+        statistic: {
+          create: statistic,
+        },
+        cover: images[idx]
+          ? {
+              create: {
+                mimeType: images[idx].file.mimeType,
+                name: images[idx].file.filename,
+                path: `/${images[idx].file.filename}`,
+              },
+            }
+          : undefined,
+      }),
+    );
+
     return this.prisma.$transaction(
-      payload.manualData?.map(({ statistic, ...content }) =>
+      prismaPayload.map((data) =>
         this.prisma.content.create({
-          data: {
-            ...content,
-            campAcctId: id,
-            id: v4(),
-            statistic: {
-              create: statistic,
-            },
-          },
+          data,
         }),
       ) ?? [],
     );

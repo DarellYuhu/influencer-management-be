@@ -39,14 +39,23 @@ export class Statistic
 
 export class CreateManualDto
   implements
-    Omit<Prisma.ContentUncheckedCreateInput, 'campAcctId' | 'statistic' | 'id'>
+    Omit<
+      Prisma.ContentUncheckedCreateInput,
+      'campAcctId' | 'statistic' | 'id' | 'coverId'
+    >
 {
-  @IsDateString()
-  createTime: string | Date;
-
   @IsString()
   @IsNotEmpty()
-  description: string;
+  @IsUrl()
+  link: string;
+
+  @IsDateString()
+  @IsOptional()
+  createTime?: string | Date;
+
+  @IsString()
+  @IsOptional()
+  description?: string;
 
   @IsNumber()
   @IsOptional()
@@ -58,13 +67,13 @@ export class CreateManualDto
 
   @IsString()
   @IsUrl()
-  @IsNotEmpty()
-  link: string;
+  @IsOptional()
+  imageLink?: string;
 
   @Type(() => Statistic)
   @IsOptional()
   @ValidateNested()
-  statistic?: Statistic;
+  statistic: Statistic;
 }
 
 export class CreateContentDto {

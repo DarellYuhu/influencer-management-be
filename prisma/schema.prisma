@@ -94,8 +94,8 @@ model Content {
   id              String          @id
   link            String
   duration        Int?
-  createTime      DateTime
-  description     String
+  createTime      DateTime?
+  description     String?
   prodComplexity  Int?
   messageEmbeding Int?
   campAcctId      Int
